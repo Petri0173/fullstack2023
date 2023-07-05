@@ -35,8 +35,6 @@ const App = () => {
 const maxVotesIndex = votes.indexOf(Math.max(...votes));
 const anecdoteWithMostVotes = anecdotes[maxVotesIndex];
 
-
-
   return (
     <div>
       <h1>Anecdote of the day</h1>
