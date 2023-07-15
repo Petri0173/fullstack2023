@@ -3,20 +3,23 @@ import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import PersonList from './components/PersonList';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+//import axios from 'axios';
+import personService from './services/persons';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data);
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons);
       });
+      
   }, []);
 
   const addName = (event) => {
@@ -32,9 +35,14 @@ const App = () => {
       number: newNumber
     };
 
-    setPersons(persons.concat(nameObject));
-    setNewName('');
-    setNewNumber('');
+    personService
+    .create(nameObject)
+    .then(returnedPerson => {
+      setPersons(persons.concat(returnedPerson));
+      setNewName('');
+      setNewNumber('');
+    });
+    
   };
 
   const handleNameChange = (event) => {
@@ -53,6 +61,22 @@ const App = () => {
     person.name.toLowerCase().includes(filter.toLowerCase()) 
   );
 
+  const handleDelete = (deletedPerson) => {
+    try {
+      const deletePerson = window.confirm(`Delete ${deletedPerson.name}?`);
+      if (deletePerson) {
+        personService.remove(deletedPerson.id);
+        setPersons(persons.filter((person) => person.id !== deletedPerson.id));
+        setMessage({ content: `Deleted ${deletedPerson.name}.`, isError: false });
+      }
+    } catch (error) {
+      setMessage({
+        content: `Error deleting ${deletedPerson.name}: ${error.message}`,
+        isError: true,
+      });
+    }
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -66,7 +90,8 @@ const App = () => {
         addName={addName}
       />
       <h2>Numbers</h2>
-      <PersonList persons={filteredPersons} />
+      <PersonList persons={filteredPersons} ondelete={handleDelete}/>
+      
     </div>
   );
 }
