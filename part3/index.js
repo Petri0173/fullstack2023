@@ -24,8 +24,27 @@ let persons = [
     }
 ];
 
+let personslength = persons.length;
+const currentDate = new Date();
+
 app.get('/api/persons', (req, res) => {
     res.json(persons);
+});
+
+app.get('/info', (req, res) => {
+    const infoMessage = `<p>Phonebook has info for ${personslength} people</p><p>${currentDate}`;
+    res.send(infoMessage);
+});
+
+app.get('/api/persons/:id', (request, response) => {
+    const id = Number(request.params.id);
+    const person = persons.find(person => person.id === id);
+    
+    if (person) {
+       response.json(person); 
+    } else {
+        response.status(404).end();
+    }
 });
 
 const PORT = 3001;
