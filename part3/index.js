@@ -11,8 +11,15 @@ morgan(function (tokens, req, res) {
         tokens.status(req, res),
         tokens.res(req, res, 'content-length'), '-',
         tokens['response-time'](req, res), 'ms'
-    ].join(' ')
-})
+    ].join(' ');
+});
+
+morgan.token('requestData', (req) => {
+    if (req.method === 'POST') {
+      return JSON.stringify(req.body);
+    }
+    return '';
+  });
 
 app.use(morgan('tiny'));
 
